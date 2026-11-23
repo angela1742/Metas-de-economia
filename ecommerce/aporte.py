@@ -1,11 +1,10 @@
+
 from datetime import date
 
 
 class Aporte:
 
-    def __init__(self, id: int, valor: float, data: date, descricao: str):
-        if id <= 0:
-            raise ValueError("O ID do aporte deve ser positivo.")
+    def __init__(self, valor: float, data: date, descricao: str):
 
         if valor <= 0:
             raise ValueError("O valor do aporte deve ser maior que zero.")
@@ -23,10 +22,23 @@ class Aporte:
         else:
             raise ValueError("A data do aporte deve ser válida.")
 
-        self.id = id
+        self._id = None
         self.valor = valor
         self.data = data
         self.descricao = descricao
+
+    @property
+    def id(self):
+        return self._id
+
+    def atribuir_id(self, id: int):
+        if self._id is not None:
+            raise ValueError("ID já atribuído.")
+
+        if id <= 0:
+            raise ValueError("O ID do aporte deve ser positivo.")
+
+        self._id = id
 
     def validar_valor(self):
         if self.valor <= 0:
