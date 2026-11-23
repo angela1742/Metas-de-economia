@@ -1,3 +1,4 @@
+
 from ecommerce.estrategias.estrategia_taxa import EstrategiaTaxa
 from ecommerce.regra_rendimento import RegraDeRendimento
 from datetime import date
@@ -12,7 +13,6 @@ class Meta_Financeira:
     def __init__(
         self,
         usuario: Usuario,
-        id: int,
         nome: str,
         categoria: Categoria,
         descricao: str,
@@ -21,9 +21,6 @@ class Meta_Financeira:
         dataPrazo: date,
         status: str
     ):
-        if id <= 0:
-            raise ValueError("O ID da meta deve ser positivo.")
-
         if not nome.strip():
             raise ValueError("O nome da meta não pode ficar vazio.")
 
@@ -40,7 +37,7 @@ class Meta_Financeira:
             raise ValueError("O prazo não pode ser anterior ao início.")
 
         self.usuario = usuario
-        self.id = id
+        self._id = None
         self.nome = nome
         self.categoria = categoria
         self.descricao = descricao
@@ -51,6 +48,19 @@ class Meta_Financeira:
 
         self.status = "Em andamento"
         self.verificar_status()
+
+    @property
+    def id(self):
+        return self._id
+
+    def atribuir_id(self, id: int):
+        if self._id is not None:
+            raise ValueError("ID já atribuído.")
+
+        if id <= 0:
+            raise ValueError("O ID da meta deve ser positivo.")
+
+        self._id = id
 
     def calcular_valor_atual(self):
         return sum(aporte.valor for aporte in self.aportes)
@@ -76,12 +86,11 @@ class Meta_Financeira:
             self.status = "Em andamento"
 
         return self.status
-    
+
     def calcular_valor_projetado(self, estrategia: EstrategiaCrescimento) -> float:
         valor_atual = self.calcular_valor_atual()
         return estrategia.calcular(valor_atual)
 
-    
     def calcular_valor_com_regra(self, regra: RegraDeRendimento) -> float:
         if not isinstance(regra, RegraDeRendimento):
             raise TypeError("É necessário fornecer uma RegraDeRendimento.")
@@ -89,7 +98,6 @@ class Meta_Financeira:
         valor_atual = self.calcular_valor_atual()
         return regra.calcular_rendimento(valor_atual)
 
-    
     def calcular_aporte_liquido(
         self,
         aporte: Aporte,
@@ -104,6 +112,4 @@ class Meta_Financeira:
         aporte.validar_valor()
 
         return estrategia.calcular(aporte.valor)
-
-
 
